@@ -2,10 +2,10 @@
   "include": ["./src"],
   "exclude": ["node_modules"],
   "compilerOptions": {
-    "target": "es2017",
-    "module": "commonjs",
-    "lib": ["es2020"],
-    "outDir": "./build",
+    "target": "ES6",
+    "module": "System",
+    "lib": ["DOM", "ES2015"],
+    "outFile": "./build/index.js",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
@@ -31,10 +31,10 @@
         (Note that using a "$" instead of "@" makes it less ambiguous if you are referring
         to a local or npm module.)
       */
-      "@/*": ["src/lib/*"],
-      "$/*": ["src/*"],
-      "$cli/*": ["src/cli/*"],
-      "$test/*": ["src/test/*"]
+      // "@/*": ["src/lib/*"],
+      // "$/*": ["src/*"],
+      // "$cli/*": ["src/cli/*"],
+      // "$test/*": ["src/test/*"]
     }
   }
 }

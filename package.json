@@ -8,7 +8,7 @@
   "private": true,
   "version": "0.0.1",
   "engines": {
-    "node": ">=13.2.0"
+    "node": "12.14.1"
   },
   "main": "./build/index.js",
   "files": [

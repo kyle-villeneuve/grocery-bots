@@ -5,3 +5,12 @@
  * be compiled -- if you need to deliver your types to consumers
  * of a published npm module use the '.ts' extension instead.
  */
+
+export enum Direction {
+  STANDBY, // not fulfilling any tasks
+  STOPPED, // stopped to retrieve item
+  UP,
+  DOWN,
+  RIGHT,
+  LEFT,
+}
