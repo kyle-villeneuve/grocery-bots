@@ -1,3 +1,5 @@
+import { Coord } from './types/index.js';
+
 // https://stackoverflow.com/a/51568508
 export const inverseColor = (hex: string): string => {
   const match = hex.match(/[a-f0-9]{2}/gi);
@@ -58,3 +60,23 @@ export function hexGenerator() {
 
 export const shortId = (prefix = '') =>
   prefix + '::' + Math.random().toString(25).slice(2, 10);
+
+export function distance(pt1: Coord, pt2: Coord) {
+  return Math.sqrt(Math.pow(pt2.y - pt1.y, 2) + Math.pow(pt2.x - pt1.x, 2));
+}
+
+export function findMatrix<T>(
+  matrix: T[][],
+  cb: (item: T, rowIndex: number, colIndex: number) => boolean,
+) {
+  // using for loops for early return
+  for (let i = 0; i < matrix.length; i++) {
+    const row = matrix[i];
+    for (let j = 0; j < row.length; j++) {
+      const item: T = row[j];
+      if (cb(item, i, j)) {
+        return item;
+      }
+    }
+  }
+}

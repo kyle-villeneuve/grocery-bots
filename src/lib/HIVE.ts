@@ -1,3 +1,5 @@
+import { Coord } from '../types/index';
+import { distance, findMatrix } from '../utils';
 import Bot from './Bot';
 import EntryCell from './EntryCell';
 import ExitCell from './ExitCell';
@@ -41,17 +43,11 @@ class HIVE {
   }
 
   addItem(item: Item) {
-    const cell = this.grid.cells.reduce(
-      (found: CellTypes | undefined, row: CellTypes[], rowIndex: number) => {
-        if (found) return found;
-        return row.find((col, colIndex) => {
-          if (rowIndex !== 0 && colIndex !== 0) return false;
-          if (rowIndex === 0 && colIndex === this.width - 1) return false;
-          return col.item === null;
-        });
-      },
-      undefined,
-    );
+    const cell = findMatrix(this.grid.cells, (cell, rowIndex, colIndex) => {
+      if (rowIndex !== 0 && colIndex !== 0) return false;
+      if (rowIndex === 0 && colIndex === this.width - 1) return false;
+      return cell.item === null;
+    });
 
     if (!cell) throw new Error('all entry cells occupied');
 
@@ -62,11 +58,57 @@ class HIVE {
     this.orders = [...this.orders, order];
   }
 
+  getUnoccupiedBot(nearest?: Coord): Bot | undefined {
+    if (!nearest) {
+      return this.bots.find((bot) => !bot.task);
+    }
+
+    const bots = this.bots
+      .filter((bot) => !bot.task)
+      .sort((a, b) => {
+        return distance(a, nearest) - distance(b, nearest);
+      });
+
+    return bots[0];
+  }
+
+  getOccupiedEntryCell() {
+    const item = findMatrix(this.grid.cells, (item): item is EntryCell =>
+      Boolean(item instanceof EntryCell && !item.task && item.item),
+    );
+    return item;
+  }
+
+  assignTasks() {
+    let unassignedWork = true;
+
+    while (unassignedWork) {
+      // TODO for now just assign one task at a time
+      const entry = this.getOccupiedEntryCell();
+
+      if (entry) {
+        const closestBot = this.getUnoccupiedBot(entry);
+        if (closestBot) {
+          entry.task = true;
+          closestBot.assignTask({
+            type: 'RETRIEVE_ITEM',
+            location: { x: entry.x, y: entry.y },
+          });
+          continue;
+        }
+      }
+
+      unassignedWork = false;
+    }
+  }
+
   tick() {
     this.ticking = setTimeout(() => {
       this.bots.forEach((bot) => bot.tick());
       this.ticking = this.tick();
     }, 100);
+
+    this.assignTasks();
 
     return this.ticking;
   }

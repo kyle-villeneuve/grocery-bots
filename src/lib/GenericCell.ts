@@ -2,16 +2,20 @@ import Grid from './Grid';
 import Item from './Item';
 
 class GenericCell {
+  type: string;
   x: number;
   y: number;
   item: Item | null;
   color: string;
+  task: boolean; // true when there is a bot making use of the cell
 
-  constructor(x: number, y: number, color: string) {
+  constructor(x: number, y: number, color: string, type: string) {
     this.x = x;
     this.y = y;
     this.item = null;
     this.color = color;
+    this.task = false;
+    this.type = type;
   }
 
   addItem(item: Item) {

@@ -14,3 +14,10 @@ export enum Direction {
   RIGHT,
   LEFT,
 }
+
+export type Coord = { x: number; y: number };
+
+// when items enter the grid, the bot will go to the item's location, grab it, and move it to an empty (?) cell
+export type BotRetrieveItem = { type: 'RETRIEVE_ITEM'; location: Coord };
+
+export type BotTask = BotRetrieveItem;

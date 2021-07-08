@@ -10,14 +10,13 @@
 import Bot from './lib/Bot';
 import HIVE from './lib/HIVE';
 import Item from './lib/Item';
-import { Direction } from './types/index';
 import { hexGenerator, randomInt } from './utils';
 
 const hive = new HIVE(22, 22);
-const bot1 = new Bot(2, 2);
-const bot2 = new Bot(4, 8);
+const bot1 = new Bot('A', 2, 2);
+const bot2 = new Bot('B', 3, 8);
 
-[
+const items = [
   'Spring water',
   'Nutella pate a tartiner noisettes-cacao t.400 pot de 400 gr',
   'Prince Chocolat',
@@ -60,16 +59,19 @@ const bot2 = new Bot(4, 8);
   'Harrys beau & bon pain de mie farine de ble cereales & graines',
   'Evian 1.5L',
   'Yaourt nature',
-].forEach((name) =>
-  hive.addItem(new Item(randomInt(1, 20), name, hexGenerator())),
-);
+].map((name) => {
+  return new Item(randomInt(1, 20), name, hexGenerator());
+});
 
-bot1.changeDirection(Direction.UP);
+items.forEach((item) => hive.addItem(item));
 
 hive.addBot(bot1);
 hive.addBot(bot2);
+
 hive.init();
 
+// const order1 = new Order([items[2]]);
+// hive.addOrder(order1);
 // hive.getOrders()
 
 /**
