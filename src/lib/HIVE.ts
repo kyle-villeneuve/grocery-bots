@@ -1,10 +1,10 @@
-import Bot from './Bot.js';
-import EntryCell from './EntryCell.js';
-import ExitCell from './ExitCell.js';
-import Grid from './Grid.js';
-import GridCell from './GridCell.js';
-import Item from './Item.js';
-import Order from './Order.js';
+import Bot from './Bot';
+import EntryCell from './EntryCell';
+import ExitCell from './ExitCell';
+import Grid from './Grid';
+import GridCell from './GridCell';
+import Item from './Item';
+import Order from './Order';
 
 type CellTypes = GridCell | ExitCell | EntryCell;
 

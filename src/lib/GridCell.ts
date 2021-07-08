@@ -1,4 +1,4 @@
-import GenericCell from './GenericCell.js';
+import GenericCell from './GenericCell';
 
 class GridCell extends GenericCell {
   constructor(x: number, y: number) {

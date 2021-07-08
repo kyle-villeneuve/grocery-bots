@@ -1,6 +1,6 @@
-import EntryCell from './EntryCell.js';
-import ExitCell from './ExitCell.js';
-import GridCell from './GridCell.js';
+import EntryCell from './EntryCell';
+import ExitCell from './ExitCell';
+import GridCell from './GridCell';
 
 class Grid {
   static scale = 35;

@@ -1,4 +1,4 @@
-import GenericCell from './GenericCell.js';
+import GenericCell from './GenericCell';
 
 class EntryCell extends GenericCell {
   // where items are added to the grid

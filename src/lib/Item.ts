@@ -1,4 +1,4 @@
-import { inverseColor, shortId } from '../utils.js';
+import { inverseColor, shortId } from '../utils';
 
 class Item {
   id: string;

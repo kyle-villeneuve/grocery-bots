@@ -17,6 +17,7 @@
     "build/types/**/*"
   ],
   "scripts": {
+    "dev": "cross-env NODE_ENV=development webpack-dev-server",
     "test": "npm run build && mocha --inspect --require source-map-support/register --bail ./build/test/",
     "build": "rimraf build && tsc && tsc-alias",
     "preversion": "npm run lint && npm run build && npm test",
@@ -47,6 +48,17 @@
     "rimraf": "^3.0.2",
     "source-map-support": "^0.5.19",
     "tsc-alias": "^1.2.11",
-    "typescript": "next"
+    "typescript": "next",
+    "@babel/core": "^7.7.7",
+    "@babel/preset-env": "^7.7.7",
+    "@babel/preset-typescript": "^7.7.7",
+    "babel-loader": "^8.0.6",
+    "cross-env": "^6.0.3",
+    "html-webpack-plugin": "^3.2.0",
+    "serve": "^11.3.0",
+    "terser-webpack-plugin": "^2.3.2",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.10.1"
   }
 }

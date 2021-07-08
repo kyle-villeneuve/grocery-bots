@@ -1,4 +1,4 @@
-import GenericCell from '../lib/GenericCell.js';
+import GenericCell from '../lib/GenericCell';
 
 class ExitCell extends GenericCell {
   // where completed orders leave the grid

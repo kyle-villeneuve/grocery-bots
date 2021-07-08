@@ -1,7 +1,7 @@
-import { Direction } from '../types/index.js';
-import { shortId } from '../utils.js';
-import Grid from './Grid.js';
-import Item from './Item.js';
+import { Direction } from '../types/index';
+import { shortId } from '../utils';
+import Grid from './Grid';
+import Item from './Item';
 
 const directionDeltaMap: Record<Direction, [number, number]> = {
   // tuple: [dx, dy]

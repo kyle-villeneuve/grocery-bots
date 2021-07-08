@@ -1,5 +1,5 @@
-import Grid from './Grid.js';
-import Item from './Item.js';
+import Grid from './Grid';
+import Item from './Item';
 
 class GenericCell {
   x: number;
