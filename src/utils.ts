@@ -80,3 +80,9 @@ export function findMatrix<T>(
     }
   }
 }
+
+export const sortNearest =
+  (nearest: Coord) =>
+  (a: Coord, b: Coord): number => {
+    return distance(a, nearest) - distance(b, nearest);
+  };

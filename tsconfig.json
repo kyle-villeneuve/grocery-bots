@@ -4,7 +4,7 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "System",
-    "lib": ["DOM", "ES2015"],
+    "lib": ["DOM", "ES2019"],
     "outFile": "./build/index.js",
     "declaration": true,
     "declarationMap": true,

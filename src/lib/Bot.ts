@@ -1,4 +1,4 @@
-import { BotTask, Direction } from '../types/index';
+import { BotTask, Coord, Direction } from '../types/index';
 import { shortId } from '../utils';
 import Grid from './Grid';
 import Item from './Item';
@@ -10,7 +10,6 @@ const directionDeltaMap: Record<Direction, [number, number]> = {
   [Direction.LEFT]: [-1, 0],
   [Direction.RIGHT]: [1, 0],
   [Direction.STOPPED]: [0, 0],
-  [Direction.STANDBY]: [0, 0],
 };
 
 class Bot {
@@ -23,6 +22,8 @@ class Bot {
   storage: { [itemId: string]: Item } = {};
   task: null | BotTask = null;
   direction = Direction.STOPPED;
+  path: Coord[] = []; // [start, leg, leg, destination]
+  onTaskCompleted?: (bot: this) => void;
 
   constructor(name: string, x: number, y: number) {
     this.id = shortId('Bot');
@@ -33,12 +34,8 @@ class Bot {
 
   tick() {
     this.getDirection();
-
-    const x = this.x + this.dx;
-    const y = this.y + this.dy;
-
-    this.x = x;
-    this.y = y;
+    this.x += this.dx;
+    this.y += this.dy;
   }
 
   draw(ctx: CanvasRenderingContext2D) {
@@ -61,32 +58,69 @@ class Bot {
     ctx.stroke();
   }
 
-  assignTask(task: BotTask, force?: boolean) {
-    if (this.task && !force) {
+  assignTask(
+    task: BotTask,
+    path: Coord[],
+    onTaskCompleted: (bot: this) => void,
+  ) {
+    if (this.task) {
       throw new Error('Bot already has task assigned to it');
     }
     this.task = task;
+    this.path = path;
+    this.onTaskCompleted = onTaskCompleted;
   }
 
   getDirection() {
-    if (!this.task) return;
+    let next: undefined | Coord = this.path[0];
+
+    while (next && this.x === next.x && this.y === next.y) {
+      [next, ...this.path] = this.path;
+    }
+
     let dx: number, dy: number;
 
-    if (this.x > this.task.location.x) {
+    if (!next) {
+      this.onTaskCompleted?.(this);
+      [dx, dy] = directionDeltaMap[Direction.STOPPED];
+    } else if (this.x > next.x) {
       [dx, dy] = directionDeltaMap[Direction.LEFT];
-    } else if (this.x < this.task.location.x) {
+    } else if (this.x < next.x) {
       [dx, dy] = directionDeltaMap[Direction.RIGHT];
-    } else if (this.y < this.task.location.y) {
+    } else if (this.y < next.y) {
       [dx, dy] = directionDeltaMap[Direction.DOWN];
-    } else if (this.y > this.task.location.y) {
+    } else if (this.y > next.y) {
       [dx, dy] = directionDeltaMap[Direction.UP];
     } else {
-      dx = 0;
-      dy = 0;
+      [dx, dy] = directionDeltaMap[Direction.STOPPED];
     }
 
     this.dx = dx;
     this.dy = dy;
+  }
+
+  addItem(item: Item) {
+    this.storage = {
+      ...this.storage,
+      [item.id]: item,
+    };
+    return this.storage;
+  }
+
+  removeItem(itemId: string) {
+    const item = this.storage[itemId];
+    if (!item) {
+      throw new Error('Item with id ${itemId} doesnt exist in bot');
+    }
+    this.storage = { ...this.storage };
+    delete this.storage[itemId];
+
+    return item;
+  }
+
+  completeTask() {
+    if (!this.task) throw new Error('No task to complete');
+    this.task = null;
   }
 }
 

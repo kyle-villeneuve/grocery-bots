@@ -7,8 +7,7 @@
  */
 
 export enum Direction {
-  STANDBY, // not fulfilling any tasks
-  STOPPED, // stopped to retrieve item
+  STOPPED, // not fulfilling any tasks
   UP,
   DOWN,
   RIGHT,
@@ -18,6 +17,15 @@ export enum Direction {
 export type Coord = { x: number; y: number };
 
 // when items enter the grid, the bot will go to the item's location, grab it, and move it to an empty (?) cell
-export type BotRetrieveItem = { type: 'RETRIEVE_ITEM'; location: Coord };
 
-export type BotTask = BotRetrieveItem;
+export type BotRetrieveItem = {
+  type: 'RETRIEVE_ITEM';
+  payload: { itemId: string };
+};
+
+export type BotPlaceItem = {
+  type: 'PLACE_ITEM';
+  payload: { itemId: string };
+};
+
+export type BotTask = BotRetrieveItem | BotPlaceItem;
