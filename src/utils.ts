@@ -24,6 +24,10 @@ export function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+export function randomElement<T>(array: T[]): T | undefined {
+  return array[randomInt(0, array.length - 1)];
+}
+
 // https://stackoverflow.com/a/50718602
 function randomHex() {
   const hexNumbers: (string | number)[] = [
@@ -61,8 +65,8 @@ export function hexGenerator() {
 export const shortId = (prefix = '') =>
   prefix + '::' + Math.random().toString(25).slice(2, 10);
 
-export function distance(pt1: Coord, pt2: Coord) {
-  return Math.sqrt(Math.pow(pt2.y - pt1.y, 2) + Math.pow(pt2.x - pt1.x, 2));
+export function manhattanDistance(pt1: Coord, pt2: Coord) {
+  return Math.abs(pt2.y - pt1.y) + Math.abs(pt2.x - pt1.x);
 }
 
 export function findMatrix<T>(
@@ -84,7 +88,7 @@ export function findMatrix<T>(
 export const sortNearest =
   (nearest: Coord) =>
   (a: Coord, b: Coord): number => {
-    return distance(a, nearest) - distance(b, nearest);
+    return manhattanDistance(a, nearest) - manhattanDistance(b, nearest);
   };
 
 export const roundTo = (precision: number) => (value: number) => {

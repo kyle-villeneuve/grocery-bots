@@ -1,5 +1,8 @@
+import { PI_2 } from '../constants';
 import { inverseColor, shortId } from '../utils';
 import Grid from './Grid';
+
+const ITEM_RADIUS = Grid.scale / 3;
 
 class Item {
   id: string;
@@ -19,12 +22,10 @@ class Item {
   draw(ctx: CanvasRenderingContext2D, x: number, y: number) {
     ctx.fillStyle = this.color;
 
-    const mid = Grid.scale / 2;
-    const _x = x * Grid.scale + mid;
-    const _y = y * Grid.scale + mid;
-    const radius = Grid.scale / 3;
+    const _x = x * Grid.scale + Grid.mid;
+    const _y = y * Grid.scale + Grid.mid;
 
-    ctx.arc(_x, _y, radius, 0, 2 * Math.PI);
+    ctx.arc(_x, _y, ITEM_RADIUS, 0, PI_2);
     ctx.fill();
     ctx.fillStyle = this.labelColor;
     ctx.fillText(this.quantity + '', _x, _y);

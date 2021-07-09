@@ -10,7 +10,7 @@
 import Bot from './lib/Bot';
 import HIVE from './lib/HIVE';
 import Item from './lib/Item';
-import { hexGenerator, randomInt } from './utils';
+import { hexGenerator, randomElement, randomInt } from './utils';
 
 const hive = new HIVE(22, 22);
 const bot1 = new Bot('A', 2, 2, '#f00');
@@ -76,13 +76,15 @@ console.log(hive);
 
 function placeItemSporadically(min: number, max: number) {
   setTimeout(() => {
-    const randomItem = items[randomInt(0, items.length)];
+    const randomItem = randomElement(items);
     try {
-      hive.addItem(randomItem);
-      placeItemSporadically(200, 2000);
-    } catch (err) {
-      placeItemSporadically(300, 3000);
-    }
+      if (randomItem) {
+        hive.addItem(randomItem);
+        placeItemSporadically(100, 500);
+        return;
+      }
+    } catch (err) {}
+    placeItemSporadically(300, 3000);
   }, randomInt(min, max));
 }
 

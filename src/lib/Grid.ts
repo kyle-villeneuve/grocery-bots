@@ -32,7 +32,6 @@ class Grid {
   // tick() {}
 
   draw(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
     ctx.fillRect(0, 0, this.width * Grid.scale, this.height * Grid.scale);
     this.cells.forEach((row) => {
       row.forEach((cell) => cell.draw(ctx));

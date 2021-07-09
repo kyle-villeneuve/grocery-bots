@@ -39,8 +39,8 @@ class Bot {
     this.changeDirection();
     [this.dx, this.dy] = directionDeltaMap[this.direction];
 
-    this.x = roundTo(10)(this.x + this.dx * 0.1);
-    this.y = roundTo(10)(this.y + this.dy * 0.1);
+    this.x = roundTo(5)(this.x + this.dx * 0.2);
+    this.y = roundTo(5)(this.y + this.dy * 0.2);
 
     this.trajectory = this.extrapolateTrajectory();
   }
@@ -56,9 +56,8 @@ class Bot {
       Grid.scale,
     );
     ctx.fillStyle = '#000';
-    const mid = Grid.scale / 2;
-    const x = this.x * Grid.scale + mid;
-    const y = this.y * Grid.scale + mid;
+    const x = this.x * Grid.scale + Grid.mid;
+    const y = this.y * Grid.scale + Grid.mid;
     ctx.fillText(this.name, x, y);
     ctx.stroke();
 
@@ -102,8 +101,8 @@ class Bot {
       );
       const [dx, dy] = directionDeltaMap[direction];
 
-      const x = roundTo(10)(lastLeg.x + dx * 0.1);
-      const y = roundTo(10)(lastLeg.y + dy * 0.1);
+      const x = roundTo(5)(lastLeg.x + dx * 0.2);
+      const y = roundTo(5)(lastLeg.y + dy * 0.2);
       lastLeg = { x, y };
       legs.push(lastLeg);
     }
