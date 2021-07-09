@@ -24,20 +24,25 @@ class Bot {
   direction = Direction.STOPPED;
   path: Coord[] = []; // [start, leg, leg, destination]
   onTaskCompleted?: (bot: this) => void;
+  trajectory: null | Coord[] = null;
+  trajectoryColor: string;
 
-  constructor(name: string, x: number, y: number) {
+  constructor(name: string, x: number, y: number, trajectoryColor = '#000') {
     this.id = shortId('Bot');
     this.name = name;
     this.x = x;
     this.y = y;
+    this.trajectoryColor = trajectoryColor;
   }
 
   tick() {
-    this.getDirection();
+    this.changeDirection();
     [this.dx, this.dy] = directionDeltaMap[this.direction];
 
     this.x = roundTo(10)(this.x + this.dx * 0.1);
     this.y = roundTo(10)(this.y + this.dy * 0.1);
+
+    this.trajectory = this.extrapolateTrajectory();
   }
 
   draw(ctx: CanvasRenderingContext2D) {
@@ -62,6 +67,48 @@ class Bot {
     if (item) {
       item.draw(ctx, this.x, this.y);
     }
+
+    if (this.trajectory) {
+      //  using points here to illustrate acceleration in the future
+      this.trajectory.forEach((pt) => {
+        ctx.fillStyle = this.trajectoryColor;
+        ctx.fillRect(
+          pt.x * Grid.scale + Grid.mid,
+          pt.y * Grid.scale + Grid.mid,
+          2,
+          2,
+        );
+      });
+    }
+  }
+
+  extrapolateTrajectory(): null | Coord[] {
+    // naively extrapolate where the bot will go in the future
+    // note: the hive will be responsible for detecting collisions and
+    // changing path when necessary
+
+    if (!this.path.length) return null;
+
+    const destination = this.path[this.path.length - 1];
+    const currentLocation: Coord = { x: this.x, y: this.y };
+
+    const legs: Coord[] = [currentLocation];
+    let lastLeg: Coord = currentLocation;
+
+    while (lastLeg.x !== destination.x || lastLeg.y !== destination.y) {
+      const direction = this.calculateDirection(
+        destination,
+        legs[legs.length - 1],
+      );
+      const [dx, dy] = directionDeltaMap[direction];
+
+      const x = roundTo(10)(lastLeg.x + dx * 0.1);
+      const y = roundTo(10)(lastLeg.y + dy * 0.1);
+      lastLeg = { x, y };
+      legs.push(lastLeg);
+    }
+
+    return legs;
   }
 
   assignTask(
@@ -77,7 +124,30 @@ class Bot {
     this.onTaskCompleted = onTaskCompleted;
   }
 
-  getDirection() {
+  calculateDirection(
+    end: undefined | Coord,
+    start: Coord = { x: this.x, y: this.y },
+  ): Direction {
+    if (!end) {
+      return Direction.STOPPED;
+    }
+    if (start.x > end.x) {
+      return Direction.LEFT;
+    }
+    if (start.x < end.x) {
+      return Direction.RIGHT;
+    }
+    if (start.y < end.y) {
+      return Direction.DOWN;
+    }
+    if (start.y > end.y) {
+      return Direction.UP;
+    }
+
+    return Direction.STOPPED;
+  }
+
+  changeDirection() {
     const initialPath: undefined | Coord = this.path[0];
     let next: undefined | Coord = initialPath;
 
@@ -85,21 +155,11 @@ class Bot {
       [next, ...this.path] = this.path;
     }
 
-    // bots will always go clockwise
-    if (!next) {
-      if (this.task) this.onTaskCompleted?.(this);
-      this.direction = Direction.STOPPED;
-    } else if (this.x > next.x) {
-      this.direction = Direction.LEFT;
-    } else if (this.x < next.x) {
-      this.direction = Direction.RIGHT;
-    } else if (this.y < next.y) {
-      this.direction = Direction.DOWN;
-    } else if (this.y > next.y) {
-      this.direction = Direction.UP;
-    } else {
-      this.direction = Direction.STOPPED;
+    if (!next && this.task) {
+      this.onTaskCompleted?.(this);
     }
+
+    this.direction = this.calculateDirection(next);
   }
 
   addItem(item: Item) {

@@ -13,9 +13,9 @@ import Item from './lib/Item';
 import { hexGenerator, randomInt } from './utils';
 
 const hive = new HIVE(22, 22);
-const bot1 = new Bot('A', 2, 2);
-const bot2 = new Bot('B', 3, 8);
-const bot3 = new Bot('C', 6, 9);
+const bot1 = new Bot('A', 2, 2, '#f00');
+const bot2 = new Bot('B', 3, 8, '#0f0');
+const bot3 = new Bot('C', 6, 9, '#00f');
 
 const items = [
   'Spring water',

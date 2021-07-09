@@ -142,7 +142,7 @@ class HIVE {
     this.ticking = setTimeout(() => {
       this.bots.forEach((bot) => bot.tick());
       this.ticking = this.tick();
-    }, 20);
+    }, 10);
 
     this.assignTasks();
 

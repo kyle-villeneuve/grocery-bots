@@ -6,6 +6,7 @@ import GridCell from './GridCell';
 
 class Grid {
   static scale = 35;
+  static mid = Grid.scale / 2;
 
   cells: (ExitCell | GridCell | EntryCell)[][];
   width: number;
