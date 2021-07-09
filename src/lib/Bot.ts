@@ -1,5 +1,5 @@
 import { BotTask, Coord, Direction } from '../types/index';
-import { shortId } from '../utils';
+import { roundTo, shortId } from '../utils';
 import Grid from './Grid';
 import Item from './Item';
 
@@ -19,7 +19,7 @@ class Bot {
   y: number;
   dx = 0;
   dy = 0;
-  storage: { [itemId: string]: Item } = {};
+  storage: Item[] = [];
   task: null | BotTask = null;
   direction = Direction.STOPPED;
   path: Coord[] = []; // [start, leg, leg, destination]
@@ -34,28 +34,34 @@ class Bot {
 
   tick() {
     this.getDirection();
-    this.x += this.dx;
-    this.y += this.dy;
+    [this.dx, this.dy] = directionDeltaMap[this.direction];
+
+    this.x = roundTo(10)(this.x + this.dx * 0.1);
+    this.y = roundTo(10)(this.y + this.dy * 0.1);
   }
 
   draw(ctx: CanvasRenderingContext2D) {
     ctx.beginPath();
-    ctx.fillStyle = 'orange';
+    ctx.fillStyle =
+      this.direction === Direction.STOPPED ? 'goldenrod' : 'orange';
     ctx.fillRect(
       this.x * Grid.scale,
       this.y * Grid.scale,
       Grid.scale,
       Grid.scale,
     );
-    ctx.font = '10px monospace';
     ctx.fillStyle = '#000';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
     const mid = Grid.scale / 2;
     const x = this.x * Grid.scale + mid;
     const y = this.y * Grid.scale + mid;
     ctx.fillText(this.name, x, y);
     ctx.stroke();
+
+    const item = this.storage[0];
+
+    if (item) {
+      item.draw(ctx, this.x, this.y);
+    }
   }
 
   assignTask(
@@ -72,55 +78,49 @@ class Bot {
   }
 
   getDirection() {
-    let next: undefined | Coord = this.path[0];
+    const initialPath: undefined | Coord = this.path[0];
+    let next: undefined | Coord = initialPath;
 
     while (next && this.x === next.x && this.y === next.y) {
       [next, ...this.path] = this.path;
     }
 
-    let dx: number, dy: number;
-
+    // bots will always go clockwise
     if (!next) {
-      this.onTaskCompleted?.(this);
-      [dx, dy] = directionDeltaMap[Direction.STOPPED];
+      if (this.task) this.onTaskCompleted?.(this);
+      this.direction = Direction.STOPPED;
     } else if (this.x > next.x) {
-      [dx, dy] = directionDeltaMap[Direction.LEFT];
+      this.direction = Direction.LEFT;
     } else if (this.x < next.x) {
-      [dx, dy] = directionDeltaMap[Direction.RIGHT];
+      this.direction = Direction.RIGHT;
     } else if (this.y < next.y) {
-      [dx, dy] = directionDeltaMap[Direction.DOWN];
+      this.direction = Direction.DOWN;
     } else if (this.y > next.y) {
-      [dx, dy] = directionDeltaMap[Direction.UP];
+      this.direction = Direction.UP;
     } else {
-      [dx, dy] = directionDeltaMap[Direction.STOPPED];
+      this.direction = Direction.STOPPED;
     }
-
-    this.dx = dx;
-    this.dy = dy;
   }
 
   addItem(item: Item) {
-    this.storage = {
-      ...this.storage,
-      [item.id]: item,
-    };
+    this.storage = [...this.storage, item];
     return this.storage;
   }
 
   removeItem(itemId: string) {
-    const item = this.storage[itemId];
-    if (!item) {
-      throw new Error('Item with id ${itemId} doesnt exist in bot');
+    const itemIdx = this.storage.findIndex((item) => item.id === itemId);
+    if (itemIdx === -1) {
+      throw new Error(`Item "${itemId}" doesnt exist in bot`);
     }
-    this.storage = { ...this.storage };
-    delete this.storage[itemId];
-
+    const [item] = this.storage.splice(itemIdx, 1);
     return item;
   }
 
-  completeTask() {
+  completeTask(): BotTask {
     if (!this.task) throw new Error('No task to complete');
+    const task = { ...this.task };
     this.task = null;
+    return task;
   }
 }
 

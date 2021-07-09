@@ -1,3 +1,5 @@
+import { Coord } from '../types/index';
+import { findMatrix, sortNearest } from '../utils';
 import EntryCell from './EntryCell';
 import ExitCell from './ExitCell';
 import GridCell from './GridCell';
@@ -34,6 +36,35 @@ class Grid {
     this.cells.forEach((row) => {
       row.forEach((cell) => cell.draw(ctx));
     });
+  }
+
+  getOccupiedEntryCell(nearest: Coord) {
+    if (nearest) {
+      const cells = this.cells
+        .flat()
+        .filter((cell): cell is EntryCell =>
+          Boolean(cell instanceof EntryCell && !cell.task && cell.item),
+        )
+        .sort(sortNearest(nearest));
+
+      return cells[0];
+    }
+
+    const item = findMatrix(this.cells, (item): item is EntryCell =>
+      Boolean(item instanceof EntryCell && !item.task && item.item),
+    );
+    return item;
+  }
+
+  getEmptyGridCell(nearest: Coord): GridCell | undefined {
+    const cell = this.cells
+      .flat()
+      .filter(
+        (cell): cell is GridCell => cell instanceof GridCell && !cell.task,
+      )
+      .sort(sortNearest(nearest));
+
+    return cell[0];
   }
 }
 

@@ -25,6 +25,14 @@ class GenericCell {
     this.item = item;
   }
 
+  startTask() {
+    this.task = true;
+  }
+
+  endTask() {
+    this.task = false;
+  }
+
   removeItem() {
     if (!this.item) {
       throw new Error('No item to remove');
@@ -45,20 +53,7 @@ class GenericCell {
     );
 
     if (this.item) {
-      ctx.fillStyle = this.item.color;
-
-      const mid = Grid.scale / 2;
-      const x = this.x * Grid.scale + mid;
-      const y = this.y * Grid.scale + mid;
-      const radius = Grid.scale / 3;
-
-      ctx.arc(x, y, radius, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.font = '10px monospace';
-      ctx.fillStyle = this.item.labelColor;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(this.item.quantity + '', x, y);
+      this.item.draw(ctx, this.x, this.y);
     }
     ctx.stroke();
   }

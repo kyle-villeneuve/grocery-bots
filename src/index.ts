@@ -15,6 +15,7 @@ import { hexGenerator, randomInt } from './utils';
 const hive = new HIVE(22, 22);
 const bot1 = new Bot('A', 2, 2);
 const bot2 = new Bot('B', 3, 8);
+const bot3 = new Bot('C', 6, 9);
 
 const items = [
   'Spring water',
@@ -67,8 +68,25 @@ items.forEach((item) => hive.addItem(item));
 
 hive.addBot(bot1);
 hive.addBot(bot2);
+hive.addBot(bot3);
 
 hive.init();
+
+console.log(hive);
+
+function placeItemSporadically(min: number, max: number) {
+  setTimeout(() => {
+    const randomItem = items[randomInt(0, items.length)];
+    try {
+      hive.addItem(randomItem);
+      placeItemSporadically(200, 2000);
+    } catch (err) {
+      placeItemSporadically(300, 3000);
+    }
+  }, randomInt(min, max));
+}
+
+placeItemSporadically(100, 1000);
 
 // const order1 = new Order([items[2]]);
 // hive.addOrder(order1);

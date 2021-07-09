@@ -3,13 +3,11 @@ import { findMatrix, sortNearest } from '../utils';
 import Bot from './Bot';
 import EntryCell from './EntryCell';
 import Grid from './Grid';
-import GridCell from './GridCell';
 import Item from './Item';
 import Order from './Order';
 
 class HIVE {
   bots: Bot[] = [];
-  items: Item[] = [];
   orders: Order[] = [];
   grid: Grid;
   width: number;
@@ -27,6 +25,11 @@ class HIVE {
     this.canvas.setAttribute('height', this.height * Grid.scale + 'px');
     this.canvas.setAttribute('width', this.width * Grid.scale + 'px');
     this.c = this.canvas.getContext('2d')!;
+
+    // base context
+    this.c.font = '10px monospace';
+    this.c.textAlign = 'center';
+    this.c.textBaseline = 'middle';
 
     document.body.appendChild(this.canvas);
 
@@ -69,41 +72,11 @@ class HIVE {
     return bots[0];
   }
 
-  getOccupiedEntryCell(nearest: Coord) {
-    if (nearest) {
-      const cells = this.grid.cells
-        .flat()
-        .filter((cell): cell is EntryCell =>
-          Boolean(cell instanceof EntryCell && !cell.task && cell.item),
-        )
-        .sort(sortNearest(nearest));
-
-      return cells[0];
-    }
-
-    const item = findMatrix(this.grid.cells, (item): item is EntryCell =>
-      Boolean(item instanceof EntryCell && !item.task && item.item),
-    );
-    return item;
-  }
-
-  getEmptyGridCell(nearest: Coord): GridCell | undefined {
-    const cell = this.grid.cells
-      .flat()
-      .filter(
-        (cell): cell is GridCell => cell instanceof GridCell && !cell.task,
-      )
-      .sort(sortNearest(nearest));
-
-    return cell[0];
-  }
-
   onBotTaskCompleted(bot: Bot) {
     if (!bot.task)
       throw new Error('Task completed but no task assigned to bot');
 
-    const task = bot.task;
-    bot.completeTask();
+    const task = bot.completeTask();
 
     switch (task.type) {
       case 'RETRIEVE_ITEM': {
@@ -113,20 +86,21 @@ class HIVE {
             'Cannot retrieve item because cell is not entry type',
           );
         }
-
+        cell.endTask();
         const item = cell.removeItem();
         bot.addItem(item);
 
-        const entryCell = this.getEmptyGridCell(bot);
+        const entryCell = this.grid.getEmptyGridCell(bot);
         if (entryCell) {
           bot.assignTask(
             { type: 'PLACE_ITEM', payload: { itemId: item.id } },
             [{ x: entryCell.x, y: entryCell.y }],
             this.onBotTaskCompleted,
           );
-          entryCell.task = true;
+          entryCell.startTask();
         } else {
           // TODO
+          throw new Error('Nowhere to place item');
         }
         break;
       }
@@ -143,7 +117,7 @@ class HIVE {
     let availableBot = this.getUnoccupiedBot();
 
     while (availableBot) {
-      const entry = this.getOccupiedEntryCell(availableBot);
+      const entry = this.grid.getOccupiedEntryCell(availableBot);
 
       if (!entry) break;
 
@@ -168,7 +142,7 @@ class HIVE {
     this.ticking = setTimeout(() => {
       this.bots.forEach((bot) => bot.tick());
       this.ticking = this.tick();
-    }, 100);
+    }, 20);
 
     this.assignTasks();
 
@@ -178,9 +152,7 @@ class HIVE {
   draw() {
     this.drawing = window.requestAnimationFrame(() => {
       this.grid.draw(this.c);
-      this.bots.forEach((bot) => {
-        bot.draw(this.c);
-      });
+      this.bots.forEach((bot) => bot.draw(this.c));
       this.drawing = this.draw();
     });
 

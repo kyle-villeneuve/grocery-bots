@@ -1,4 +1,4 @@
-import { Coord } from './types/index.js';
+import { Coord } from './types/index';
 
 // https://stackoverflow.com/a/51568508
 export const inverseColor = (hex: string): string => {
@@ -86,3 +86,7 @@ export const sortNearest =
   (a: Coord, b: Coord): number => {
     return distance(a, nearest) - distance(b, nearest);
   };
+
+export const roundTo = (precision: number) => (value: number) => {
+  return Math.round(value * precision) / precision;
+};
