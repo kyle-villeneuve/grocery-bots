@@ -17,15 +17,32 @@ export enum Direction {
 export type Coord = { x: number; y: number };
 
 // when items enter the grid, the bot will go to the item's location, grab it, and move it to an empty (?) cell
+export type BotTaskTemplate<
+  T extends { type: string; payload?: Record<string, any> },
+> = Coord & T;
 
-export type BotRetrieveItem = {
+export type BotRetrieveItem = BotTaskTemplate<{
   type: 'RETRIEVE_ITEM';
   payload: { itemId: string };
-};
+}>;
 
-export type BotPlaceItem = {
+export type BotPlaceItem = BotTaskTemplate<{
   type: 'PLACE_ITEM';
   payload: { itemId: string };
-};
+}>;
 
-export type BotTask = BotRetrieveItem | BotPlaceItem;
+export type BotPickItem = BotTaskTemplate<{
+  type: 'PICK_ITEM';
+  payload: { itemId: string; orderId: string };
+}>;
+
+export type BotPlaceOrder = BotTaskTemplate<{
+  type: 'PLACE_ORDER';
+  payload: { orderId: string };
+}>;
+
+export type BotTask =
+  | BotRetrieveItem
+  | BotPlaceItem
+  | BotPlaceOrder
+  | BotPickItem;

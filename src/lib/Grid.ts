@@ -1,5 +1,5 @@
 import { Coord } from '../types/index';
-import { findMatrix, sortNearest } from '../utils';
+import { findNearest } from '../utils';
 import EntryCell from './EntryCell';
 import ExitCell from './ExitCell';
 import GridCell from './GridCell';
@@ -29,42 +29,44 @@ class Grid {
     });
   }
 
-  // tick() {}
-
   draw(ctx: CanvasRenderingContext2D) {
+    ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, this.width * Grid.scale, this.height * Grid.scale);
     this.cells.forEach((row) => {
       row.forEach((cell) => cell.draw(ctx));
     });
   }
 
-  getOccupiedEntryCell(nearest: Coord) {
+  getOccupiedEntryCell(nearest: Coord): EntryCell | undefined {
+    const cells = this.cells
+      .flat()
+      .filter((cell): cell is EntryCell =>
+        Boolean(cell instanceof EntryCell && !cell.task && cell.item),
+      );
+
+    return findNearest(nearest, cells);
+  }
+
+  getUnoccupiedExitCell(nearest: Coord) {
     if (nearest) {
       const cells = this.cells
         .flat()
-        .filter((cell): cell is EntryCell =>
-          Boolean(cell instanceof EntryCell && !cell.task && cell.item),
-        )
-        .sort(sortNearest(nearest));
+        .filter((cell): cell is ExitCell =>
+          Boolean(cell instanceof ExitCell && !cell.task && !cell.order),
+        );
 
-      return cells[0];
+      return findNearest(nearest, cells);
     }
-
-    const item = findMatrix(this.cells, (item): item is EntryCell =>
-      Boolean(item instanceof EntryCell && !item.task && item.item),
-    );
-    return item;
   }
 
   getEmptyGridCell(nearest: Coord): GridCell | undefined {
-    const cell = this.cells
+    const cells = this.cells
       .flat()
       .filter(
         (cell): cell is GridCell => cell instanceof GridCell && !cell.task,
-      )
-      .sort(sortNearest(nearest));
+      );
 
-    return cell[0];
+    return findNearest(nearest, cells);
   }
 }
 

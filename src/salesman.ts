@@ -1,5 +1,5 @@
 import { Coord } from './types/index';
-import { manhattanDistance } from './utils.js';
+import { manhattanDistance } from './utils';
 
 /**
  * @module
@@ -10,28 +10,28 @@ import { manhattanDistance } from './utils.js';
  * @see {@link https://lovasoa.github.io/salesman.js/|demo}
  **/
 
-/**
- * @private
- */
-
 class Path {
   points: Coord[];
-  order: any[];
-  distances: any[];
+  order: number[];
+  distances: number[];
 
   constructor(points: Coord[]) {
     this.points = points;
     this.order = new Array(points.length);
     this.distances = new Array(points.length * points.length);
 
-    for (let i = 0; i < points.length; i++) this.order[i] = i;
+    for (let i = 0; i < points.length; i++) {
+      this.order[i] = i;
+    }
 
-    for (let i = 0; i < points.length; i++)
-      for (let j = 0; j < points.length; j++)
+    for (let i = 0; i < points.length; i++) {
+      for (let j = 0; j < points.length; j++) {
         this.distances[j + i * points.length] = manhattanDistance(
           points[i],
           points[j],
         );
+      }
+    }
   }
 
   change(temp: number) {
@@ -114,11 +114,17 @@ class Path {
  * var ordered_points = solution.map(i => points[i]);
  * // ordered_points now contains the points, in the order they ought to be visited.
  **/
-export default function solve(points: Coord[], temp_coeff = 0.999) {
+export default function travelingSalesman<T extends Coord>(
+  points: T[],
+  temp_coeff = 0.999,
+): T[] {
   const path = new Path(points);
-  if (points.length < 2) return path.order; // There is nothing to optimize
-  if (!temp_coeff)
+  if (points.length < 2) {
+    return path.order.map((index) => points[index]); // There is nothing to optimize
+  }
+  if (!temp_coeff) {
     temp_coeff = 1 - Math.exp(-10 - Math.min(points.length, 1e6) / 1e5);
+  }
 
   for (
     let temperature = 100 * manhattanDistance(path.access(0), path.access(1));
@@ -127,5 +133,5 @@ export default function solve(points: Coord[], temp_coeff = 0.999) {
   ) {
     path.change(temperature);
   }
-  return path.order;
+  return path.order.map((index) => points[index]);
 }

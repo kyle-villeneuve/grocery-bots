@@ -1,16 +1,9 @@
-/**
- * @file This is the entrypoint for your project.
- * If used as a node module, when someone runs
- * `import stuff from 'your-module'` (typescript)
- * or `const stuff = require('your-module')` (javascript)
- * whatever is exported here is what they'll get.
- * For small projects you could put all your code right in this file.
- */
-
 import Bot from './lib/Bot';
+import GridCell from './lib/GridCell';
 import HIVE from './lib/HIVE';
 import Item from './lib/Item';
-import { hexGenerator, randomElement, randomInt } from './utils';
+import Order from './lib/Order';
+import { debupeBy, hexGenerator, randomElement, randomInt } from './utils';
 
 const hive = new HIVE(22, 22);
 const bot1 = new Bot('A', 2, 2, '#f00');
@@ -60,9 +53,11 @@ const items = [
   'Harrys beau & bon pain de mie farine de ble cereales & graines',
   'Evian 1.5L',
   'Yaourt nature',
-].map((name) => {
-  return new Item(randomInt(1, 20), name, hexGenerator());
-});
+]
+  .slice(5, randomInt(10, 15))
+  .map((name) => {
+    return new Item(randomInt(1, 20), name, hexGenerator());
+  });
 
 items.forEach((item) => hive.addItem(item));
 
@@ -70,25 +65,65 @@ hive.addBot(bot1);
 hive.addBot(bot2);
 hive.addBot(bot3);
 
-hive.init();
+hive.draw();
 
 console.log(hive);
 
+let itemTimeout: null | NodeJS.Timeout;
+let orderTimeout: null | NodeJS.Timeout;
+
 function placeItemSporadically(min: number, max: number) {
-  setTimeout(() => {
+  return setTimeout(() => {
     const randomItem = randomElement(items);
     try {
       if (randomItem) {
         hive.addItem(randomItem);
-        placeItemSporadically(100, 500);
+        itemTimeout = placeItemSporadically(100, 500);
         return;
       }
     } catch (err) {}
-    placeItemSporadically(300, 3000);
+    itemTimeout = placeItemSporadically(300, 3000);
   }, randomInt(min, max));
 }
 
-placeItemSporadically(100, 1000);
+function placeOrderSporadically(min: number, max: number) {
+  return setTimeout(() => {
+    const items = hive.grid.cells.flatMap((row) =>
+      row
+        .map((cell) => cell instanceof GridCell && cell.item)
+        .filter((item): item is Item => !!item),
+    );
+
+    const orderItems = new Array(randomInt(1, 4))
+      .fill(null)
+      .map(() => randomElement(items))
+      .filter((item): item is Item => !!item);
+
+    const uniqueOrderItems = debupeBy(orderItems, (i) => i.id);
+
+    try {
+      if (uniqueOrderItems.length) {
+        const order = new Order(uniqueOrderItems);
+        hive.addOrder(order);
+        orderTimeout = placeOrderSporadically(1000, 5000);
+        return;
+      }
+    } catch (err) {}
+    orderTimeout = placeOrderSporadically(2000, 5000);
+  }, randomInt(min, max));
+}
+
+window.addEventListener('click', () => {
+  if (hive.ticking) {
+    hive.halt();
+    orderTimeout && clearTimeout(orderTimeout);
+    itemTimeout && clearTimeout(itemTimeout);
+  } else {
+    itemTimeout = placeItemSporadically(100, 1000);
+    orderTimeout = placeOrderSporadically(100, 1000);
+    hive.init();
+  }
+});
 
 // const order1 = new Order([items[2]]);
 // hive.addOrder(order1);
